@@ -1,1 +1,1 @@
-# fc-mysql-spring-priject
+# fc-mysql-spring-project
