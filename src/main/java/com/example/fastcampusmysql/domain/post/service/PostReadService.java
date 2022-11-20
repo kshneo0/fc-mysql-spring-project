@@ -42,7 +42,7 @@ public class PostReadService {
         return posts.stream()
                 .mapToLong(Post::getId)
                 .min()
-                .orElse(cursorRequest.NON_KEY);
+                .orElse(cursorRequest.NONE_KEY);
     }
 
     public PageCursor<Post> getPosts(Long memberId, CursorRequest cursorRequest) {
@@ -57,6 +57,10 @@ public class PostReadService {
         var nextKey = getNextKey(cursorRequest, posts);
         return new PageCursor<>(cursorRequest.next(nextKey), posts);
 
+    }
+
+    public List<Post> getPosts(List<Long> ids) {
+        return postRepository.findAllByInId(ids);
     }
 
     private List<Post> findAllBy(Long memberId, CursorRequest cursorRequest) {

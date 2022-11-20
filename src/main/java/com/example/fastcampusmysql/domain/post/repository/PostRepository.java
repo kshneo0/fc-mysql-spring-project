@@ -33,7 +33,6 @@ public class PostRepository {
     final private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     final static private RowMapper<Post> ROW_MAPPER = (ResultSet resultSet, int rowNum) -> Post.builder()
-
             .id(resultSet.getLong("id"))
             .memberId(resultSet.getLong("memberId"))
             .contents(resultSet.getString("contents"))
@@ -123,6 +122,21 @@ public class PostRepository {
         var params = new MapSqlParameterSource()
                 .addValue("memberIds", memberIds)
                 .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByInId(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE id in (:ids)
+                """, TABLE);
+
+        var params = new MapSqlParameterSource()
+                .addValue("ids", ids);
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 

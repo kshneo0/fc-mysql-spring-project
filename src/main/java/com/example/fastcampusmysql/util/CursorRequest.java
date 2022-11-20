@@ -6,7 +6,7 @@ package com.example.fastcampusmysql.util;
  * date : 2022/11/20
  */
 public record CursorRequest(Long key, int size) {
-    public static final Long NON_KEY = -1L;
+    public static final Long NONE_KEY = -1L;
 
     public Boolean hasKey() {
         return key != null;
