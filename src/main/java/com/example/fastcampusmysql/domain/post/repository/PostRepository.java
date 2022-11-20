@@ -1,9 +1,9 @@
 package com.example.fastcampusmysql.domain.post.repository;
 
-import com.example.fastcampusmysql.util.PageHelper;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.entity.Post;
+import com.example.fastcampusmysql.util.PageHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -92,7 +92,7 @@ public class PostRepository {
         return namedParameterJdbcTemplate.queryForObject(sql, params, Long.class);
     }
 
-    public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size){
+    public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, int size) {
         var sql = String.format("""
                 SELECT *
                 FROM %s
@@ -103,11 +103,30 @@ public class PostRepository {
 
         var params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
-                .addValue("size",size);
+                .addValue("size", size);
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 
-    public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size){
+    public List<Post> findAllByInMemberIdAndAndOrderByIdDesc(List<Long> memberIds, int size) {
+        if (memberIds.isEmpty()) {
+            return List.of();
+        }
+
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds)
+                ORDER BY id desc
+                LIMIT :size
+                """, TABLE);
+
+        var params = new MapSqlParameterSource()
+                .addValue("memberIds", memberIds)
+                .addValue("size", size);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, int size) {
         var sql = String.format("""
                 SELECT *
                 FROM %s
@@ -118,8 +137,29 @@ public class PostRepository {
 
         var params = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
-                .addValue("size",size)
-                .addValue("id",id);
+                .addValue("size", size)
+                .addValue("id", id);
+        return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
+    }
+
+    public List<Post> findAllByLessThanIdAndInMemberIdAndOrderByIdDesc(Long id, List<Long> memberIds, int size) {
+
+        if (memberIds.isEmpty()) {
+            return List.of();
+        }
+
+        var sql = String.format("""
+                SELECT *
+                FROM %s
+                WHERE memberId in (:memberIds) and id < :id
+                ORDER BY id desc
+                LIMIT :size
+                """, TABLE);
+
+        var params = new MapSqlParameterSource()
+                .addValue("memberIds", memberIds)
+                .addValue("size", size)
+                .addValue("id", id);
         return namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 
