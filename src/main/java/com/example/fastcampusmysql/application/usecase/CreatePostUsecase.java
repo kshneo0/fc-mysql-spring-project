@@ -7,6 +7,7 @@ import com.example.fastcampusmysql.domain.post.service.PostWriteService;
 import com.example.fastcampusmysql.domain.post.service.TimelineWriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * fileName : CreatePostUsecase
@@ -22,17 +23,14 @@ public class CreatePostUsecase {
 
     final private TimelineWriteService timelineWriteService;
 
+    //@Transactional  //여기에 트랜잭션을 거는 것은 생각을 해봐야 한다.
     public Long execute(PostCommand postCommand) {
         var postId = postWriteService.create(postCommand);
-
-        System.out.println("-----------------------------------postCommand.memberId() : " + postCommand.memberId());
 
         var followerMemberIds = followReadService.getFollowers(postCommand.memberId())
                 .stream()
                 .map(Follow::getFromMemberId)
                 .toList();
-
-        System.out.println("-----------------------------------followerMemberIds : " + followerMemberIds);
 
         timelineWriteService.deliveryToTimeline(postId, followerMemberIds);
         return postId;
